@@ -18,153 +18,210 @@ for(int t = 0 ; t < T ; t++ ) {
     int M = sc.nextInt()
 
     println "${R} ${C} ${M}"
-    def field = fill(R, C, M)
+    def field = fillHorizontal(R, C, M)
+    def sol = solve(R, C, M, field)
 
-
-//    println field
-
-    for (int r = 0; r < R; r++) {
-        for (int c = 0; c < C; c++) {
-            print field[r][c]
-        }
-        println ""
+    if(sol == null){
+        field = fillVertical(R, C, M)
+        sol = solve(R, C, M, field)
     }
-//    boolean solve = canSolve(R,C,field)
-//
-//    w.writeLine("Case #${t+1}:")
-//
-//    if(!solve) {
-//        w.writeLine("Impossible")
-//    }else {
-//
-//        boolean click = false
-//        for(int r=0; r<R; r++){
-//            for(int c=0; c<C; c++){
-//
-//                int cell = field[r][c]
-//
-//                if(cell == -1){
-//                    w.write("*")
-//                }else{
-//                    if(cell == 0 && !click) {
-//                        w.write("c")
-//                        click = true
-//                    }else {
-//                        w.write(".")
-//                    }
-//                }
-//            }
-//            w.writeLine("")
-//        }
-//    }
+
+    if(sol == null){
+        println "Impossible"
+
+    }else {
+        for(int r=0; r<R; r++){
+            for(int c=0; c<C; c++) {
+
+                Cell cell = field[r][c]
+
+                if(cell.click){
+                    print "c"
+                }else if(cell.mine){
+                    print "*"
+                }else{
+                    print "."
+                }
+            }
+            println ""
+        }
+    }
 
 }
 w.close()
 
 class Cell {
     boolean mine
+    boolean click = false
     boolean visited = false
     int count = 0
-    int r, c
+    int r, maxRow, c, maxCol
+    def field
+
+    String toString(){
+        if(mine) {
+            return "*"
+        }else{
+            return "${count}"
+        }
+    }
+
+    List vizinhos() {
+
+        List v = []
+        if (c + 1 < maxCol) {
+            //DIREITA
+            v << field[r][c + 1]
+        }
+        if (c + 1 < maxCol && r + 1 < maxRow) {
+            //DIAGONAL DIREITA BAIXO
+            v << field[r + 1][c + 1]
+        }
+        if (r + 1 < maxRow) {
+            //BAIXO
+            v << field[r + 1][c]
+        }
+        if (c - 1 >= 0 && r + 1 < maxRow) {
+            //DIAGONAL ESQUERDA BAIXO
+            v << field[r + 1][c - 1]
+        }
+        if (c - 1 >= 0) {
+            //ESQUERDA
+            v << field[r][c - 1]
+        }
+        if (c - 1 >= 0 && r - 1 >= 0) {
+            //DIAGONAL ESQUERDA TOPO
+            v << field[r -1 ][c - 1]
+        }
+        if (r - 1 >= 0) {
+            //TOPO
+            v << field[r - 1][c]
+        }
+        if (c + 1 < maxCol && r - 1 >= 0) {
+            //DIAGONAL DIREITA TOPO
+            v << field[r -1 ][c + 1]
+        }
+
+        return v
+    }
 }
 
-def fill(int R, int C, int M) {
+def fillHorizontal(int R, int C, int M) {
 
     def field = new Cell[R][C]
 
     int mineNum = 0
 
-    if(R < C) {
+    for(int r=0; r<R; r++){
         for(int c=0; c<C; c++){
-            for(int r=0; r<R; r++){
 
-                if(mineNum < M) {
-                    field[r][c] = new Cell(mine: true, r: r, c: c)
-                    mineNum++
-                }else {
-                    field[r][c] = new Cell(mine: false, r: r, c: c)
-                }
-            }
-        }
-    } else {
-        for(int c=0; c<C; c++){
-            for(int r=0; r<R; r++){
-
-                if(mineNum < M) {
-                    field[r][c] = new Cell(mine: true, r: r, c: c)
-                    mineNum++
-                }else {
-                    field[r][c] = new Cell(mine: false, r: r, c: c)
-                }
+            if(mineNum < M) {
+                field[r][c] = new Cell(mine: true, r: r, c: c, maxRow: R, maxCol: C, field: field)
+                mineNum++
+            }else {
+                field[r][c] = new Cell(mine: false, r: r, c: c, maxRow: R, maxCol: C, field: field)
             }
         }
     }
+
+    countMines(R, C, field)
 
     return field
 }
 
-def solve(int R, int C, def field) {
+def fillVertical(int R, int C, int M) {
 
-    for(int r=0; r<R; r++){
-        for(int c=0; c<C; c++){
+    def field = new Cell[R][C]
 
-            calcMines(field, R, C, field[r][c])
+    int mineNum = 0
 
-            //verifica se todos os nao mina foram visitados
+    for(int c=0; c<C; c++){
+        for(int r=0; r<R; r++){
 
-            //caso sim
-            //return solucao
-
-            //caso nao
-            //limpa visited, count para proxima chamada de calcMines
-            //
-
+            if(mineNum < M) {
+                field[r][c] = new Cell(mine: true, r: r, c: c, maxRow: R, maxCol: C, field: field)
+                mineNum++
+            }else {
+                field[r][c] = new Cell(mine: false, r: r, c: c, maxRow: R, maxCol: C, field: field)
+            }
         }
     }
 
-    return false
+    countMines(R, C, field)
+
+    return field
 }
 
-def calcMines(def field, int R, int C, Cell cell) {
+def countMines(int R, int C, def field) {
+    for (int r = 0; r < R; r++) {
+        for(int c=0; c<C; c++) {
+            field[r][c].count = field[r][c].vizinhos().count { it.mine }
+        }
+    }
 
-    if(cell.mine) {
+}
+
+def solve(int R, int C, int M, def field) {
+
+    int totalCells = R * C
+
+    for(int r=0; r<R; r++){
+        for(int c=0; c<C; c++) {
+
+            field[r][c].click = true
+            open(field[r][c])
+
+            //verifica se todos os nao mina foram visitados
+            int abertos = countAbertosNaoMina(R, C, field)
+
+            if ((totalCells - (M + abertos)) == 0) {
+                return field
+            } else {
+                limpa(R, C, field)
+            }
+        }
+    }
+
+    return null
+}
+
+def open(Cell cell) {
+
+    if(cell.visited){
         return
     }
 
-    if(!cell.visited) {
-        cell.visited = true
+    cell.visited = true
+    if(cell.mine || cell.count > 0) {
+        return
+    }
 
-        if (cell.c + 1 < C) {
-            //DIREITA
-            calcMines(field, R, C, field[cell.r][cell.c + 1])
+    //cell mine == 0 e nao visitado
+    cell.vizinhos().each { v ->
+        open(v)
+    }
+}
+
+int countAbertosNaoMina(int R, int C, def field) {
+
+    int total = 0
+    for (int r = 0; r < R; r++) {
+        for (int c = 0; c < C; c++) {
+
+            if(field[r][c].visited && !field[r][c].mine){
+                total++
+            }
         }
-        if (cell.c + 1 < C && cell.r + 1 < R) {
-            //DIAGONAL DIREITA BAIXO
-            calcMines(field, R, C, field[cell.r + 1][cell.c + 1])
-        }
-        if (cell.r + 1 < R) {
-            //BAIXO
-            calcMines(field, R, C, field[cell.r + 1][cell.c])
-        }
-        if (cell.c - 1 >= 0 && cell.r + 1 < R) {
-            //DIAGONAL ESQUERDA BAIXO
-            calcMines(field, R, C, field[cell.r + 1][cell.c - 1])
-        }
-        if (cell.c - 1 >= 0) {
-            //ESQUERDA
-            calcMines(field, R, C, field[cell.r][cell.c - 1])
-        }
-        if (cell.c - 1 >= 0 && cell.r - 1 >= 0) {
-            //DIAGONAL ESQUERDA TOPO
-            calcMines(field, R, C, field[cell.r -1 ][cell.c - 1])
-        }
-        if (cell.r - 1 >= 0) {
-            //TOPO
-            calcMines(field, R, C, field[cell.r - 1][cell.c])
-        }
-        if (cell.c + 1 < C && cell.r - 1 >= 0) {
-            //DIAGONAL DIREITA TOPO
-            calcMines(field, R, C, field[cell.r -1 ][cell.c + 1])
+    }
+    return total
+}
+
+void limpa(int R, int C, def field) {
+    for (int r = 0; r < R; r++) {
+        for (int c = 0; c < C; c++) {
+            field[r][c].visited = false
+            field[r][c].click = false
         }
     }
 }
+
