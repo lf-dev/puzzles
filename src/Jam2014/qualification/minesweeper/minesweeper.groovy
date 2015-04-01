@@ -2,8 +2,8 @@ package Jam2014.qualification.minesweeper
 
 MINE = -1
 
-def filename = "C-small-practice"
-//def filename = "C-large-practice"
+//def filename = "C-small-practice"
+def filename = "C-large-practice"
 //def filename = "sample"
 
 Scanner sc = new Scanner(new File(filename + '.in'))
@@ -21,11 +21,18 @@ for(int t = 0 ; t < T ; t++ ) {
 
     println "${R} ${C} ${M}"
 
-    int offsetTop = 0
-    while(2 * C < M){
-        M = M - C
+    int offset = 0
+    while(2 * R + 2 * C - 4 < M){
+        M = M - (R + C - 1)
         R--
-        offsetTop++
+        C--
+        offset++
+    }
+
+    if(C > R){
+        int temp = C
+        C = R
+        R = temp
     }
 
     println "${R} ${C} ${M}"
@@ -37,12 +44,13 @@ for(int t = 0 ; t < T ; t++ ) {
         //field possui resposta
 
         //print offsetTop
-        offsetTop.times {
-            w.writeLine("*"*C)
+        offset.times {
+            w.writeLine("*"*(C+offset))
         }
 
         for(int r=0; r<R; r++){
 
+            w.write("*"*offset)
             for(int c=0; c<C; c++) {
 
                 Cell cell = field[r][c]
@@ -139,24 +147,40 @@ boolean prune(def field, int r, int C, int M) {
     return false
 }
 
+boolean prune2(def field, int r, int c, int M) {
+
+    if(M==1){
+        return false
+    }
+
+    String line = ":"
+    for(int i=0; i<c; i++){
+        line += field[r][i].mine ? "*":"."
+    }
+    line += ":"
+
+    if(line.contains(":.*") || line.contains("*.*") || line.contains("*..*")){// || line.contains("*.:")){
+        return true
+    }
+
+    return false
+}
+
 boolean brute(def field, int m, int r, int c, int R, int C, int M) {
+
+    if(prune2(field, r, c, M)){
+        return false
+    }
 
     if (c == C) {
         c = 0
         r++
-
-        if(prune(field, r-1, C, M)){
-            return false
-        }
     }
 
     //chegou ao fim da enumeracao
     if(r == R) {
         if(m==0) {
-
-            boolean sol = resolve(R, C, M, field)
-
-            return sol
+            return resolve(R, C, M, field)
         }else {
             return false
         }
@@ -192,8 +216,8 @@ boolean resolve(int R, int C, int M, def field) {
 
     countMines(R, C, field)
 
-    for(int r=0; r<R; r++){
-        for(int c=0; c<C; c++) {
+    for(int r=R-1; r>=0; r--){
+        for(int c=C-1; c>=0; c--) {
 
             field[r][c].click = true
             open(field[r][c])
