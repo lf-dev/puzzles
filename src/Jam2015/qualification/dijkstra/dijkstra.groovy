@@ -39,7 +39,14 @@ for(int t = 0 ; t < T ; t++ ) {
     int L = sc.nextInt()
     int X = sc.nextInt()
 
-    String line = sc.next() * X
+    String line = sc.next()
+
+    String transf = line[0]
+    for(int n=1; n < line.size() ; n++){
+        transf = transform(transf,line[n])
+    }
+    line = transf*X
+
     //println line
 
     List countI = [0]*line.size()

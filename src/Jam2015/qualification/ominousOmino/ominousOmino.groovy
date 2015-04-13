@@ -3,8 +3,8 @@ package Jam2015.qualification.ominousOmino
 import java.security.InvalidParameterException
 
 //def filename = "sample"
-def filename = "D-small-attempt2"
-//def filename = "B-large"
+//def filename = "D-small-attempt2"
+def filename = "D-large"
 
 Scanner sc = new Scanner(new File(filename + '.in'))
 def file = new File(filename + '.out')
@@ -39,11 +39,19 @@ String solve(int X, int R, int C) {
     String richard = "RICHARD"
 
     //REGRA GERAL
+
+    //nao tem espaco
     if(X > R*C){
         return richard
     }
 
+    //nao é multiplo
     if((R*C)%X != 0){
+        return richard
+    }
+
+    //richard pode escolher a peca comprida
+    if(X>R && X>C){
         return richard
     }
 
@@ -58,51 +66,30 @@ String solve(int X, int R, int C) {
 
     if(X==3){
 
-        boolean c2r3 = C%2==0 && R%3==0
-        boolean c3r2 = C%3==0 && R%2==0
-        boolean c3r3 = C%3==0 && R%3==0
+        List primes = [2,3,5,7,9,11,13,17,19]
 
-        return (c2r3 || c3r2 || c3r3) ? gabriel : richard
-    }
-
-    if(X == 4){
-
-        /*
-
-        boolean c3r4 = C%3==0 && R%4==0
-        boolean c4r3 = C%4==0 && R%3==0
-        boolean c4r4 = C%4==0 && R%4==0
-
-        boolean c5r4 = C%5==0 && R%4==0
-        boolean c4r5 = C%4==0 && R%5==0
-        boolean c5r5 = C%4==0 && R%4==0
-
-        boolean c7r4 = C%7==0 && R%4==0
-        boolean c4r7 = C%4==0 && R%7==0
-
-        boolean c9r4 = C%9==0 && R%4==0
-        boolean c4r9 = C%4==0 && R%9==0
-
-        boolean c9r5 = C%9==0 && R%5==0
-        boolean c5r9 = C%4==0 && R%9==0
-
-        boolean c11r4 = C%11==0 && R%4==0
-        boolean c4r11 = C%4==0 && R%11==0
-
-        boolean c13r4 = C%13==0 && R%4==0
-        boolean c4r13 = C%4==0 && R%13==0
-
-        List g = [c3r4, c4r3, c4r4, c5r4, c4r5, c5r5, c7r4, c4r7, c9r4, c4r9, c9r5, c5r9, c11r4, c4r11, c13r4, c4r13]
-        */
-
-        List primes = [3,5,7,9,11,13,17,19]
-
-        boolean Rg = primes.contains(R) || R==4
-        boolean Cg = primes.contains(C) || C==4
+        boolean Rg = primes.any{ p -> R%p==0 }
+        boolean Cg = primes.any{ p -> C%p==0 }
 
         return (Rg && Cg) ? gabriel : richard
     }
 
+    if(X >= 4 && X <= 6){
+
+        //2 é primo mas nao funciona para X=4, 5 ,6
+        if(R==2 || C==2){
+            return richard
+        }
+
+        List primes = [2,3,5,7,9,11,13,17,19]
+
+        boolean Rg = primes.any{ p -> R%p==0 }
+        boolean Cg = primes.any{ p -> C%p==0 }
+
+        return (Rg && Cg) ? gabriel : richard
+    }
+
+    //richard pode escolher a peca com buraco isolado no meio
     if(X >= 7) {
         return richard
     }
