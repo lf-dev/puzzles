@@ -32,13 +32,29 @@ Random r = new Random()
 //}
 //w.close()
 
-println combine(2, 4)
-println combine(3, 4)
-println combine(4, 4)
+printCombinations(2, 6)
+println GF(2, 6)
+//printCombinations(3, 4)
+//printCombinations(4, 4)
+
+void printCombinations(int rolls, int dice){
+    List combinations = combine(rolls, dice)
+    int total = combinations.sum()
+    List percents = combinations.collect{ it/total }
+    List acumulado = percents.collect()
+
+    for(int i=1; i<acumulado.size(); i++){
+        acumulado[i] += acumulado[i-1]
+    }
+
+    println combinations
+//    println percents
+//    println acumulado
+}
 
 double monteCarlo(int H, List spells, Random r) {
 
-    int numSimulations = 10**8
+    int numSimulations = 10**7
     double bestProbability = 0
 
     for(Map spell : spells) {
@@ -65,8 +81,9 @@ int roll(Map spell, Random r) {
 
     int total = 0
     for(int i=0; i<spell.x; i++){
-        total += r.nextInt(spell.y) + 1 + spell.z
+        total += r.nextInt(spell.y) + 1
     }
+    total += spell.z
     return total
 
 }
@@ -88,6 +105,26 @@ Map parseSpell(String str) {
         spell.z = 0
     }
     return spell
+}
+
+List GF(int rolls, int dice) {
+
+    int max = rolls*dice
+    int min = rolls
+
+    List sols = [0]*max
+
+    for(int x=min; x<=max; x++) {
+
+        double a = x**rolls
+        a = a * (1 - x**6)
+        a = a / ((1- x)**rolls)
+
+        sols[x-1] = a
+    }
+
+    return sols
+
 }
 
 List combine(int rolls, int dice) {
