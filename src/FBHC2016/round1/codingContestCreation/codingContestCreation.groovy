@@ -1,6 +1,7 @@
 package FBHC2016.round1.codingContestCreation
 
-go()
+//go()
+test()
 
 def go() {
 //    def filename = "sample"
