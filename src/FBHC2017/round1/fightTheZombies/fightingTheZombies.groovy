@@ -1,9 +1,9 @@
 package FBHC2017.round1.fightTheZombies
 
-test()
+//test()
 
-def filename = "sample"
-//def filename = "fight_the_zombies"
+//def filename = "sample"
+def filename = "fighting_the_zombies"
 
 Scanner sc = new Scanner(new File(filename + '.txt'))
 def file = new File(filename + '.out')
@@ -24,10 +24,10 @@ for (int t = 0; t < T; t++) {
         Ns << new Point(X, Y)
     }
 
-    int min = best(Ns, N, R)
+    int score = best(Ns, N, R)
 
-    w.writeLine("Case #${t + 1}: $min")
-    println("Case #${t + 1}: $min")
+    w.writeLine("Case #${t + 1}: $score")
+    println("Case #${t + 1}: $score")
 }
 
 
@@ -39,6 +39,7 @@ int best(List Ns, int N, int R) {
 
     int bestScore = 0
     Point bestMoveCenter = new Point(0, 0)
+    List bestMoved = []
     Point bestDestroiCenter = new Point(0, 0)
 
     for(int i=0; i<N; i++) {
@@ -54,26 +55,31 @@ int best(List Ns, int N, int R) {
                 Point center = centers[c]
                 List moved = zombiesIntoTheSquare(Ns, center, R)
 
-                for(int k=0; k<N; k++){
-                    Point p3 = Ns[k]
+                if(moved.size() > bestMoved.size()){
+                    bestMoved = moved
+                    bestMoveCenter = center
+                }
+            }
+        }
 
-                    for( m=k+1; m<N; m++) {
-                        Point p4 = Ns[m]
+        for(int k=0; k<N; k++){
+            Point p3 = Ns[k]
 
-                        List centers2 = squares(p3, p4, R)
+            for( m=k+1; m<N; m++) {
+                Point p4 = Ns[m]
 
-                        for(int c2=0; c2<centers2.size(); c2++){
+                List centers2 = squares(p3, p4, R)
 
-                            Point center2 = centers2[c2]
-                            List destroied = zombiesIntoTheSquare(Ns, center2, R)
+                for(int c2=0; c2<centers2.size(); c2++){
 
-                            int score = (destroied + moved).unique().size()
-                            if(score > bestScore){
-                                bestScore = score
-                                bestMoveCenter = center
-                                bestDestroiCenter = center2
-                            }
-                        }
+                    Point center2 = centers2[c2]
+                    List destroied = zombiesIntoTheSquare(Ns, center2, R)
+
+                    int score = (destroied + bestMoved).unique().size()
+                    if(score > bestScore){
+                        bestScore = score
+//                        bestMoveCenter = center
+//                        bestDestroiCenter = center2
                     }
                 }
             }
@@ -234,7 +240,7 @@ void test(){
     assert best(Ns3, Ns3.size(), 1) == 2
 
     long init = System.currentTimeMillis()
-    1.times {
+    10.times {
         print "."
         List Ns50 = []
         50.times {
