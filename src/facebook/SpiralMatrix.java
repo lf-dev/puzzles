@@ -24,7 +24,7 @@ public class SpiralMatrix {
 
             N[i][j] = curr;
             curr++;
-            dir = navigate(dir, N);
+            dir = walk(dir, N);
         }
 
         for(int x=0; x<n; x++) {
@@ -35,10 +35,9 @@ public class SpiralMatrix {
 
             }
         }
-
     }
 
-    private static char navigate(char dir, int[][] N) {
+    private static char walk(char dir, int[][] N) {
 
         if(dir == 'r') {
 
