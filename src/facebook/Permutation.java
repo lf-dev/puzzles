@@ -17,20 +17,43 @@ public class Permutation {
         String b = "babcabbacaabcbabcacbb";
 
         Map<Character, Integer> sMap = buildMap(s, 0, s.length());
+        Map<Character, Integer> bMap = buildMap(b, 0, s.length());
 
         int total = 0;
         for(int i=0; i + s.length() < b.length(); i++) {
-
-            Map<Character, Integer> bMap = buildMap(b, i, i + s.length());
 
             if(sMap.equals(bMap)) {
                 System.out.println("i: " + i);
                 total++;
             }
+
+            decrementOrRemove(bMap, b.charAt(i));
+
+            if(i + s.length() < b.length()) {
+                addOrIncrement(bMap, b.charAt(i+s.length()));
+            }
         }
 
         System.out.println(total);
 
+    }
+
+    private static void decrementOrRemove(Map<Character, Integer> map, char key) {
+
+        int value = map.get(key);
+        if(value == 1) {
+            map.remove(key);
+        }else {
+            map.put(key, value - 1);
+        }
+    }
+
+    private static void addOrIncrement(Map<Character, Integer> map, char key) {
+
+        if(!map.containsKey(key)) {
+            map.put(key, 0);
+        }
+        map.put(key, map.get(key) + 1);
     }
 
     private static Map<Character, Integer> buildMap(String str, int init, int end) {
@@ -39,10 +62,7 @@ public class Permutation {
         for(int i=init; i<end; i++) {
 
             char key = str.charAt(i);
-            if(!map.containsKey(key)) {
-                map.put(key, 0);
-            }
-            map.put(key, map.get(key) + 1);
+            addOrIncrement(map, key);
         }
 
         return map;
